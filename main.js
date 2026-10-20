@@ -1,6 +1,6 @@
 /* A·O·T·U F/W 2026 — main script
    1.유틸  2.PC 서브메뉴  3.모바일 슬라이드 메뉴  4.메인 슬라이더  5.탭  6.모달
-   7.추가 스크립트(스크롤 이벤트·등장 애니메이션·맨 위로)  8.VIEW 클릭 효과 */
+   7.추가 스크립트(스크롤 이벤트·등장 애니메이션·맨 위로·FAQ·뉴스레터)  8.VIEW 클릭 효과 */
 
 (function () {
   'use strict';
@@ -380,7 +380,7 @@
   });
 
   // 스크롤하면 섹션이 부드럽게 나타남
-  var revealTargets = $$('.street-story, .shop-section, .collection, .new-chapter, .details-section, .archive-banner');
+  var revealTargets = $$('.street-story, .shop-section, .statement, .collection, .new-chapter, .details-section, .archive-banner, .journal, .values, .reviews, .gallery, .faq, .newsletter');
   revealTargets.forEach(function (el) { el.classList.add('reveal'); });
 
   if ('IntersectionObserver' in window) {
@@ -396,6 +396,48 @@
   } else {
     revealTargets.forEach(function (el) { el.classList.add('in-view'); });
   }
+
+  /* ===== 7-2. FAQ 아코디언 · 뉴스레터 폼 검사 ===== */
+  var faqButtons = $$('.faq-q');
+  faqButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var willOpen = btn.getAttribute('aria-expanded') !== 'true';
+      faqButtons.forEach(function (b) {
+        b.setAttribute('aria-expanded', 'false');
+        $('#' + b.getAttribute('aria-controls')).hidden = true;
+      });
+      btn.setAttribute('aria-expanded', String(willOpen));
+      $('#' + btn.getAttribute('aria-controls')).hidden = !willOpen;
+    });
+  });
+
+  var newsForm = $('#newsletterForm');
+  var newsInput = $('#newsletterEmail');
+  var newsMsg = $('#newsletterMsg');
+  var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  newsForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var value = newsInput.value.trim();
+    if (!emailPattern.test(value)) {
+      newsInput.setAttribute('aria-invalid', 'true');
+      newsMsg.classList.add('is-error');
+      newsMsg.textContent = 'Please enter a valid email address.';
+      newsInput.focus();
+      return;
+    }
+    newsInput.removeAttribute('aria-invalid');
+    newsMsg.classList.remove('is-error');
+    newsMsg.textContent = 'Thank you for joining! Use code WELCOME10 for 10% off your first order.';
+    newsForm.reset();
+  });
+  newsInput.addEventListener('input', function () {
+    if (newsInput.getAttribute('aria-invalid')) {
+      newsInput.removeAttribute('aria-invalid');
+      newsMsg.textContent = '';
+      newsMsg.classList.remove('is-error');
+    }
+  });
 
   /* ===== 8. VIEW 링크 클릭 효과 ===== */
   document.addEventListener('click', function (e) {
